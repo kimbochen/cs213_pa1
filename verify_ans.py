@@ -1,4 +1,6 @@
 import sys
+from pathlib import Path
+
 import numpy as np
 import scipy.sparse as sp
 
@@ -17,4 +19,6 @@ x = np.ones([m, 1], dtype=np.float64)
 n_iter = int(sys.argv[2])
 for _ in range(n_iter):
     x = mat @ x
-print(x)
+
+fname = Path(sys.argv[1]).stem
+np.savetxt(f'{fname}_iter{sys.argv[2]}.ans', x, fmt='%10.8f')
