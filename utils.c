@@ -52,18 +52,25 @@ void execute(int argc, char **argv, SPMVFunc spmvFn)
     for (int i = 0; i < n; i++) {
         x[i] = 1.0;
     }
-    for (int i = 0; i < m; i++) {
-        y[i] = 0.0;
-    }
 
     // Perform computation
     for (int i = 0; i < n_iter; i++) {
+        // Zero out output vector
+        for (int i = 0; i < m; i++) {
+            y[i] = 0.0;
+        }
+
         spmvFn(m, n, nnz, row, col, val, x, y, n_thread);
+
+        // Set output as next input (m is always equal to n)
+        for (int i = 0; i < m; i++) {
+            x[i] = y[i];
+        }
     }
 
     // Print output vector
     for (int i = 0; i < m; i++) {
-        printf("%lf\n", y[i]);
+        printf("%.8lf\n", y[i]);
     }
 
     // free memory
