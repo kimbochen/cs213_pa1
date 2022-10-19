@@ -24,6 +24,8 @@ void sparseMatVecMul(
             y[i] += val[j] * x[col[j] - 1];
         }
     }
+
+    free(csr);
 }
 
 
