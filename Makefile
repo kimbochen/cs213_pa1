@@ -2,25 +2,12 @@ CC=gcc
 CFLAGS=-std=c99 -Wall -O1 -fopenmp
 
 
-all: csrs cscs
+$(ALGO): $(ALGO).o utils.o
+	$(CC) $(CFLAGS) $(DBG) $(ALGO).o utils.o -o spmv
 
 
-$(ALG): $(ALG).o utils.o
-	$(CC) $(CFLAGS) $(DBG) $(ALG).o utils.o -o spmv$(ALG)
-
-
-csrs: CSRSeq.o utils.o
-	$(CC) $(CFLAGS) $(DBG) CSRSeq.o utils.o -o spmv
-
-CSRSeq.o: CSRSeq.c
-	$(CC) $(CFLAGS) $(DBG) -c CSRSeq.c
-
-
-cscs: CSCSeq.o utils.o
-	$(CC) $(CFLAGS) $(DBG) CSCSeq.o utils.o -o spmv
-
-CSCSeq.o: CSCSeq.c
-	$(CC) $(CFLAGS) $(DBG) -c CSCSeq.c
+$(ALGO).o: $(ALGO).c
+	$(CC) $(CFLAGS) $(DBG) -c $(ALGO).c
 
 
 utils.o: utils.c
