@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-std=c99 -Wall -O1
+CFLAGS=-std=c99 -Wall -O1 -fopenmp
 
 
 all: csrs cscs
