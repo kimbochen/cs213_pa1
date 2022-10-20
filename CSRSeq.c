@@ -4,7 +4,10 @@
 #include "utils.h"
 
 
-void sparseMatVecMul(int *row, int *col, double *val, double *x, double *y, int N, int nnz, int n_iter)
+void sparseMatVecMul(
+    int *row, int *col, double *val, double *x, double *y,
+    int N, int nnz, int n_iter
+)
 {
     // Convert row array to CSR format
     int *csr = (int*) malloc((N + 1) * sizeof(int));
@@ -27,7 +30,7 @@ void sparseMatVecMul(int *row, int *col, double *val, double *x, double *y, int 
             }
         }
 
-        // Set output as next input
+        // Set output as next input and zero-out output vector
         if (k < n_iter - 1) {
             for (int i = 0; i < N; i++) {
                 x[i] = y[i];
