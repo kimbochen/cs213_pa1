@@ -2,9 +2,9 @@
 #define UTILS_H
 
 // Arguments:
-// int m, int n, int nnz, int *row, int *col, double *val,
-// double *x, double *y, int n_thread
-typedef void (*SPMVFunc)(int, int, int, int*, int*, double*, double*, double*, int);
+// int *row, int *col, double *val, double *x, double *y, 
+// int N, int nnz, int n_iter
+typedef void (*SPMVFunc)(int*, int*, double*, double*, double*, int, int, int);
 
 void execute(int, char**, SPMVFunc);
 
