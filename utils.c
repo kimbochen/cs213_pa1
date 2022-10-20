@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <omp.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -12,22 +13,22 @@ void execute(int argc, char **argv, SPMVFunc spmvFn)
         printf("Expected 4 arguments, got %d.\n", argc);
         exit(1);
     }
-    int n_iter = safe_strtol(argv[2]);
-    int n_thread = safe_strtol(argv[3]);
 
-    // Open file
-    FILE *fin = fopen(argv[1], "r");
-
+    
+    // Read file data
+    FILE *fin = fopen(argv[1], "r");  // Open file
     if (fin == NULL) {
         puts("File name error.");
         exit(1);
     }
 
-    // Read file data
     int m, n, nnz;
-
     if (fscanf(fin, "%d %d %d", &m, &n, &nnz) != 3) {
         puts("Cannot read matrix dimensions.");
+        exit(1);
+    }
+    if (m != n) {
+        puts("Invalid dimensions: input should be a square matrix.");
         exit(1);
     }
 
@@ -41,9 +42,9 @@ void execute(int argc, char **argv, SPMVFunc spmvFn)
             exit(1);
         }
     }
+    
+    fclose(fin);  // Close file
 
-    // Close file
-    fclose(fin);
 
     // Initialize vectors
     double *x = (double*) malloc(n * sizeof(double));
@@ -52,23 +53,19 @@ void execute(int argc, char **argv, SPMVFunc spmvFn)
     for (int i = 0; i < n; i++) {
         x[i] = 1.0;
     }
-
-    // Perform computation
-    for (int i = 0; i < n_iter; i++) {
-        // Zero out output vector
-        for (int i = 0; i < m; i++) {
-            y[i] = 0.0;
-        }
-
-        spmvFn(m, n, nnz, row, col, val, x, y, n_thread);
-
-        // Set output as next input (m is always equal to n)
-        for (int i = 0; i < m; i++) {
-            x[i] = y[i];
-        }
+    for (int i = 0; i < m; i++) {
+        y[i] = 0.0;
     }
 
-    // Print output vector
+    // Perform computation
+    int n_iter = safe_strtol(argv[2]);
+    int n_thread = safe_strtol(argv[3]);
+
+    omp_set_num_threads(n_thread);
+    spmvFn(row, col, val, x, y, n, nnz, n_iter);
+
+
+    // Print result
     for (int i = 0; i < m; i++) {
         printf("%.8lf\n", y[i]);
     }
@@ -89,7 +86,7 @@ int safe_strtol(char *arg)
     int num = strtol(arg, &p, 10);
 
     if (*p != '\0' || errno != 0) {
-        printf("Invalid argument %s\n", arg);
+        printf("Cannot convert argument '%s' to number\n", arg);
         exit(1);
     }
 
