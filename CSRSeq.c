@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "utils.h"
 
@@ -10,17 +11,17 @@ void sparseMatVecMul(
 )
 {
     // Convert row array to CSR format
-    int *csr = (int*) malloc((N + 1) * sizeof(int));
+    int *csr = calloc(N + 1, sizeof(int));
 
-    csr[0] = 0;
-    for (int r = 1, j = 0; r < N + 1; r++) {
-        // csr[r] is the first index j where row[j] != r
-        while (row[j] == r && j < nnz) {
-            j++;
-        }
-        csr[r] = j;
+    // Count the number of elements in each column: column i at col[i+1]
+    for (int i = 0; i < nnz; i++) {
+        csr[row[i]]++;
     }
 
+    // Perform cumulative sum
+    for (int i = 2; i < N + 1; i++) {
+        csr[i] += csr[i - 1];
+    }
 
     // Perform matrix-vector multiplication
     for (int k = 0; k < n_iter; k++) {
@@ -29,7 +30,6 @@ void sparseMatVecMul(
                 y[i] += val[j] * x[col[j] - 1];
             }
         }
-
         // Set output as next input and zero-out output vector
         if (k < n_iter - 1) {
             for (int i = 0; i < N; i++) {
@@ -38,7 +38,6 @@ void sparseMatVecMul(
             }
         }
     }
-
 
     free(csr);  // Free memory for CSR array
 }
