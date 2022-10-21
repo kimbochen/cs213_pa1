@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-std=c99 -Wall -O1 -fopenmp
+CFLAGS=-std=c99 -Wall -O0 -fopenmp
 
 
 $(ALGO): $(ALGO).o utils.o
