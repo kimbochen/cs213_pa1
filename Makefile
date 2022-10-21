@@ -15,4 +15,4 @@ utils.o: utils.c
 
 
 clean:
-	rm -f spmv *.o
+	rm -f spmv gmon.out *.o
