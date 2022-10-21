@@ -30,6 +30,10 @@ void sparseMatVecMul(
     for (int i = 2; i < N + 1; i++) {
         csc[i] += csc[i - 1];
     }
+
+    // Create a column major order row array
+    int *row_t = (int*) malloc(nnz * sizeof(int));
+    double *val_t = (double*) malloc(nnz * sizeof(double));
 #ifdef PROF
     toc = omp_get_wtime();
     printf("CSC conversion: %.5lf\n", toc - tic);
@@ -39,19 +43,24 @@ void sparseMatVecMul(
 #ifdef PROF
     tic = omp_get_wtime();
 #endif
-    // Create a column major order row array
-    int *row_t = (int*) malloc(nnz * sizeof(int));
-    double *val_t = (double*) malloc(nnz * sizeof(double));
 
-    for (int c = 1, idx = 0; c < N + 1; c++) {
-        for (int i = 0; i < nnz; i++) {
-            if (col[i] == c) {
-                row_t[idx] = row[i] - 1;
-                val_t[idx] = val[i];
-                idx++;
+#pragma omp parallel
+    {
+        for (int c = 1, idx = 0; c < N + 1; c++) {
+#pragma omp for
+            for (int i = 0; i < nnz; i++) {
+                if (col[i] == c) {
+#pragma omp critical
+                    {
+                        row_t[idx] = row[i] - 1;
+                        val_t[idx] = val[i];
+                        idx++;
+                    }
+                }
             }
         }
     }
+
 #ifdef PROF
     toc = omp_get_wtime();
     printf("Create row_t val_t arrays: %.5lf\n", toc - tic);
@@ -61,18 +70,25 @@ void sparseMatVecMul(
 #ifdef PROF
     tic = omp_get_wtime();
 #endif
-    // Perform matrix-vector multiplication
-    for (int k = 0; k < n_iter; k++) {
-        for (int c = 0; c < N; c++) {
-            for (int j = csc[c]; j < csc[c + 1]; j++) {
-                y[row_t[j]] += val_t[j] * x[c];
+
+#pragma omp parallel
+    {
+        for (int k = 0; k < n_iter; k++) {
+            // Perform matrix-vector multiplication
+#pragma omp for
+            for (int c = 0; c < N; c++) {
+                for (int j = csc[c]; j < csc[c + 1]; j++) {
+                    y[row_t[j]] += val_t[j] * x[c];
+                }
             }
-        }
-        // Set output as next input and zero-out output vector
-        if (k < n_iter - 1) {
-            for (int i = 0; i < N; i++) {
-                x[i] = y[i];
-                y[i] = 0.0;
+
+            // Set output as next input and zero-out output vector
+            if (k < n_iter - 1) {
+#pragma omp for
+                for (int i = 0; i < N; i++) {
+                    x[i] = y[i];
+                    y[i] = 0.0;
+                }
             }
         }
     }
