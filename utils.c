@@ -61,16 +61,16 @@ void execute(int argc, char **argv, SPMVFunc spmvFn)
 
     omp_set_num_threads(n_thread);
 
-#ifdef PERF
+#ifdef PROF
     double tic = omp_get_wtime();
 #endif
     spmvFn(row, col, val, x, y, n, nnz, n_iter);
-#ifdef PERF
+#ifdef PROF
     double toc = omp_get_wtime();
-    printf("Elapsed: %.5f seconds\n", toc - tic);
+    printf("Elapsed: %.5lf seconds\n", toc - tic);
 #endif
 
-#ifndef PERF
+#ifndef PROF
     // Print result
     for (int i = 0; i < m; i++) {
         printf("%.8lf\n", y[i]);
