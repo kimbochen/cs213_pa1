@@ -14,7 +14,6 @@ void execute(int argc, char **argv, SPMVFunc spmvFn)
         exit(1);
     }
 
-    
     // Read file data
     FILE *fin = fopen(argv[1], "r");  // Open file
     if (fin == NULL) {
@@ -45,7 +44,6 @@ void execute(int argc, char **argv, SPMVFunc spmvFn)
     
     fclose(fin);  // Close file
 
-
     // Initialize vectors
     double *x = (double*) malloc(n * sizeof(double));
     double *y = (double*) malloc(m * sizeof(double));
@@ -63,7 +61,6 @@ void execute(int argc, char **argv, SPMVFunc spmvFn)
 
     omp_set_num_threads(n_thread);
     spmvFn(row, col, val, x, y, n, nnz, n_iter);
-
 
     // Print result
     for (int i = 0; i < m; i++) {
