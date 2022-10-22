@@ -10,12 +10,12 @@ void sparseMatVecMul(
     int N, int nnz, int n_iter
 )
 {
-#ifdef PROF
+#ifdef PROFD
     double tic, toc;
 #endif
 
 
-#ifdef PROF
+#ifdef PROFD
     tic = omp_get_wtime();
 #endif
     // Convert col array to CSC format
@@ -34,13 +34,13 @@ void sparseMatVecMul(
     // Create a column major order row array
     int *row_t = (int*) malloc(nnz * sizeof(int));
     double *val_t = (double*) malloc(nnz * sizeof(double));
-#ifdef PROF
+#ifdef PROFD
     toc = omp_get_wtime();
     printf("CSC conversion: %.5lf\n", toc - tic);
 #endif
 
 
-#ifdef PROF
+#ifdef PROFD
     tic = omp_get_wtime();
 #endif
 
@@ -62,13 +62,13 @@ void sparseMatVecMul(
     }
 
 
-#ifdef PROF
+#ifdef PROFD
     toc = omp_get_wtime();
     printf("Create row_t val_t arrays: %.5lf\n", toc - tic);
 #endif
 
 
-#ifdef PROF
+#ifdef PROFD
     tic = omp_get_wtime();
 #endif
 
@@ -90,7 +90,7 @@ void sparseMatVecMul(
         }
     }
 
-#ifdef PROF
+#ifdef PROFD
     toc = omp_get_wtime();
     printf("Matrix vector multiplication: %.5lf\n", toc - tic);
 #endif
