@@ -23,13 +23,14 @@ void sparseMatVecMul(
         csr[i] += csr[i - 1];
     }
 
+    for (int k = 0; k < n_iter; k++) {
 #pragma omp parallel
-    {
-        for (int k = 0; k < n_iter; k++) {
+        {
             // Perform matrix-vector multiplication
-#pragma omp for
+            int j;
+#pragma omp for private(j)
             for (int i = 0; i < N; i++) {
-                for (int j = csr[i]; j < csr[i + 1]; j++) {
+                for (j = csr[i]; j < csr[i + 1]; j++) {
                     y[i] += val[j] * x[col[j] - 1];
                 }
             }
